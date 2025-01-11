@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy Birthday</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center; 
+            background-image: url('bg_ultah.jpg'); /* Ganti dengan nama file gambarmu */
+            background-size: cover; /* Agar gambar memenuhi seluruh halaman */
+            background-repeat: no-repeat; /* Mencegah pengulangan gambar */
+            background-position: center;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .hidden {
+            display: none;
+        }
+        .gift-icon {
+            font-size: 50px;
+            cursor: pointer;
+            color: #ff6f91;
+        }
+        .love {
+            font-size: 30px;
+            cursor: pointer;
+            display: inline-block;
+            margin: 10px;
+            color: #ff4757;
+        }
+        #message {
+            display: inline-block;
+            overflow: hidden;
+            white-space: nowrap;
+            animation: typing 4s steps(40, end);
+            padding-right: 5px;
+            color: #2d3436;
+        }
+        .page {
+            padding: 20px;
+            background-color: #ffe6f0;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 80%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        button {
+            background-color: #ff6f91;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin-top: 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #ff4757;
+        }
+
+        input[type="text"] {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            width: 80%;
+            margin: 10px auto;
+            display: block;
+        }
+
+        @keyframes typing {
+            from { width: 0 }
+            to { width: 100% }
+        }
+
+        @keyframes open-gift {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(0); opacity: 0; }
+        }
+
+        #gift-img.open {
+            animation: open-gift 1s ease-out forwards;
+        }
+
+        @keyframes page-fade-out {
+            0% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
+        #gift-page.fade-out {
+            animation: page-fade-out 0.5s ease-out forwards;
+        }
+
+        #gift-box {
+            cursor: pointer;
+            position: relative;
+            display: inline-block;
+        }
+
+    </style>
+</head>
+<body>
+
+    <audio id="bg-music" loop>
+        <source src="ultah_musik.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="click-sound">
+        <source src="klik.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="typing-sound">
+        <source src="typing-sound.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="gift-sound">
+        <source src="happy-children.mp3" type="audio/mpeg">
+    </audio>
+    
+    <div id="gift-page" class="page">
+        <span class="gift-icon" onclick="animateGiftBox(); aninextPage('name-input-page')">
+            <img id="gift-img" src="kotak.png" alt="Gift Box" style="width: 200px;">
+        </span>
+        <p>Click on the Gift</p>
+    </div>
+
+    <div id="name-input-page" class="page hidden">
+        <p>Input your name</p>
+        <input type="text" id="name" placeholder="Your name">
+        <button onclick="playClickSound(); submitName()">Okay</button>
+    </div>
+
+    <div id="welcome-page" class="page hidden">
+        <h1 id="greeting"></h1>
+        <p>I have something for you</p>
+        <button onclick="playClickSound(); nextPage('click-love-page'); autoHideLoves()">Click to Continue</button>
+    </div>
+
+    <div id="click-love-page" class="page hidden">
+        <p>Loading...</p>
+        <span class="love">❤️</span>
+        <span class="love">❤️</span>
+        <span class="love">❤️</span>
+        <span class="love">❤️</span>
+        <span class="love">❤️</span>
+    </div>
+    
+    <!-- <div id="click-love-page" class="page hidden">
+        <p>Silahkan, klik 4 Love di bawah</p>
+        <span class="love" onclick="playClickSound(); clickLove(this)">❤️</span>
+        <span class="love" onclick="playClickSound(); clickLove(this)">❤️</span>
+        <span class="love" onclick="playClickSound(); clickLove(this)">❤️</span>
+        <span class="love" onclick="playClickSound(); clickLove(this)">❤️</span>
+    </div> -->
+
+    <div id="birthday-messages" class="page hidden">
+        <p id="message"></p>
+    </div>
+
+    <div id="ask-gift" class="page hidden">
+        <p>Do you want a gift or not?</p>
+        <button onclick="playClickSound(); showResponse('mau')">Want</button>
+        <button onclick="playClickSound(); showResponse('engga')">No</button>
+    </div>
+
+    <div id="response" class="page hidden">
+        <p id="response-text" style="display: inline-block; overflow: hidden; white-space: nowrap; padding-right: 5px;"></p>
+    </div>
+
+    <script>
+        let messages = [
+            "Wait a moment ...",
+            "Someone's celebrating their special day today!",
+            "Happy Birthday to you!",
+            "Another year older, but always growing wiser",
+            "Wishing you a life filled with love and happiness",
+            "May this year bring you closer to your dreams",
+            "Stay healthy and keep shining bright!"
+        ];
+
+
+        let responseMessagesWant = [
+            "Sorry, I don't have a gift for you",
+            "I always wish the best for you",
+            "As you grow older",
+            "I hope your life becomes even more meaningful",
+            "Keep becoming a better you!",
+            "Happy Level Up Day!"
+        ];
+
+        let responseMessagesNo = [
+            "That's okay if you don't want it",
+            "Just know, you are loved no matter what"
+        ];
+
+        let messageIndex = 0;
+        let responseIndex = 0;
+        let loveClicks = 0;
+
+        document.getElementById('bg-music').play();
+
+        function playClickSound() {
+            let clickSound = document.getElementById('click-sound');
+            clickSound.currentTime = 0;
+            clickSound.play();
+        }
+
+        function playTypingSound() {
+            let typingSound = document.getElementById('typing-sound');
+            typingSound.currentTime = 0;
+            typingSound.play();
+        }
+
+        function playGiftSound() {
+            let giftSound = document.getElementById('gift-sound');
+            giftSound.currentTime = 0;
+            giftSound.play();
+        }
+
+        function animateGiftBox() {
+            let giftImg = document.getElementById('gift-img');
+            let giftBox = document.getElementById('gift-page');
+
+            giftImg.classList.add('open');
+
+            setTimeout(() => {
+                giftPage.classList.add('fade-out'); // Tambahkan efek fade-out pada halaman gift
+            }, 1000);
+
+            setTimeout(() => {
+                nextPage('name-input-page');
+            }, 1500); 
+        }
+
+        function nextPage(pageId) {
+            document.querySelectorAll('div').forEach(div => div.classList.add('hidden'));
+            document.getElementById(pageId).classList.remove('hidden');
+        }
+
+        function submitName() {
+            let name = document.getElementById('name').value;
+            document.getElementById('greeting').innerText = `Happy Birthday\n ${name} 🥳🎉🎂`;
+            nextPage('welcome-page');
+        }
+
+        function autoHideLoves() {
+            const loves = document.querySelectorAll('.love'); // Pilih semua elemen dengan class 'love'
+            let index = 0; // Mulai dari emoji pertama
+
+            const interval = setInterval(() => {
+                if (index < loves.length) {
+                    loves[index].style.display = 'none'; // Sembunyikan emoji satu per satu
+                    index++;
+                } else {
+                    clearInterval(interval); // Hentikan interval jika semua emoji sudah hilang
+                    nextPage('birthday-messages'); // Pindah ke halaman berikutnya
+                    showMessages();
+                }
+            }, 1000); // Ganti 1000 dengan durasi (ms) untuk waktu antar emoji
+        }
+
+        function showMessages() {
+            if (messageIndex < messages.length) {
+                let messageContainer = document.getElementById('message');
+                messageContainer.innerText = messages[messageIndex];
+                messageContainer.style.width = '0';
+                messageContainer.style.animation = 'none';
+                void messageContainer.offsetWidth; // Trigger reflow
+                messageContainer.style.animation = 'typing 6s steps(60, end)';
+                playTypingSound();
+                messageIndex++;
+                setTimeout(showMessages, 6000);
+            } else {
+                nextPage('ask-gift');
+            }
+        }
+
+        function showResponse(choice) {
+            document.getElementById('ask-gift').classList.add('hidden');
+            document.getElementById('response').classList.remove('hidden');
+            if (choice === 'mau') {
+                showResponseMessagesWant();
+            } else {
+                showResponseMessagesNo();
+                // let responseText = document.getElementById('response-text');
+                // responseText.style.width = '0';
+                // responseText.style.animation = 'none';
+                // responseText.innerText = [
+                //     "That's okay if you don't want it",
+                //     "Just know, you are loved no matter what."
+                // ];
+                // void responseText.offsetWidth; // Trigger reflow
+                // responseText.style.animation = 'typing 4s steps(40, end)';
+                // playTypingSound();
+            }
+        }
+
+        function showResponseMessagesWant() {
+            if (responseIndex < responseMessagesWant.length) {
+                let responseText = document.getElementById('response-text');
+                responseText.style.width = '0';
+                responseText.style.animation = 'none';
+                responseText.innerText = responseMessagesWant[responseIndex];
+                void responseText.offsetWidth; // Trigger reflow
+                responseText.style.animation = 'typing 6s steps(60, end)';
+                responseIndex++;
+                setTimeout(showResponseMessagesWant, 6000);
+            }
+        }
+
+        function showResponseMessagesNo() {
+            if (responseIndex < responseMessagesNo.length) {
+                let responseText = document.getElementById('response-text');
+                responseText.style.width = '0';
+                responseText.style.animation = 'none';
+                responseText.innerText = responseMessagesNo[responseIndex];
+                void responseText.offsetWidth; // Trigger reflow
+                responseText.style.animation = 'typing 6s steps(60, end)';
+                responseIndex++;
+                setTimeout(showResponseMessagesNo, 6000);
+            }
+        }
+
+        // Mendapatkan elemen audio
+        var audio = document.getElementById('bg-music');
+
+        // Ambil posisi terakhir dari LocalStorage saat halaman dimuat
+        window.onload = function() {
+            var savedTime = localStorage.getItem('audioTime');
+            if (savedTime !== null) {
+                audio.currentTime = savedTime;
+            }
+            audio.play();
+        };
+
+        // Simpan posisi waktu audio sebelum halaman di-refresh
+        window.onbeforeunload = function() {
+            localStorage.setItem('audioTime', audio.currentTime);
+        };
+    </script>
+
+</body>
+</html>
